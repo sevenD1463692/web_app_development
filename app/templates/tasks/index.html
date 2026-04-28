@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}My Tasks - MyLife{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card p-4 mb-4">
+            <h4 class="mb-3">Add New Task</h4>
+            <form action="{{ url_for('tasks.add_task') }}" method="POST">
+                <div class="mb-3">
+                    <label for="title" class="form-label">Task Title</label>
+                    <input type="text" name="title" class="form-control" id="title" required>
+                </div>
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea name="description" class="form-control" id="description" rows="3"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="due_date" class="form-label">Due Date</label>
+                    <input type="date" name="due_date" class="form-control" id="due_date">
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Add Task</button>
+            </form>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <h2 class="mb-4">To-Do List</h2>
+        {% if tasks %}
+            <div class="list-group">
+                {% for task in tasks %}
+                    <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center card mb-2 p-3">
+                        <div class="d-flex align-items-center">
+                            <form action="{{ url_for('tasks.update_task', id=task.id) }}" method="POST" class="me-3">
+                                <input type="hidden" name="title" value="{{ task.title }}">
+                                <input type="hidden" name="is_completed" value="{{ 'on' if not task.is_completed else '' }}">
+                                <button type="submit" class="btn btn-sm {{ 'btn-success' if task.is_completed else 'btn-outline-secondary' }}">
+                                    {{ '✓' if task.is_completed else '○' }}
+                                </button>
+                            </form>
+                            <div>
+                                <h5 class="mb-0 {{ 'text-decoration-line-through text-muted' if task.is_completed }}">{{ task.title }}</h5>
+                                <small class="text-muted">Due: {{ task.due_date.strftime('%Y-%m-%d') if task.due_date else 'No deadline' }}</small>
+                            </div>
+                        </div>
+                        <div class="d-flex">
+                            <a href="{{ url_for('tasks.edit_task', id=task.id) }}" class="btn btn-sm btn-light me-2">Edit</a>
+                            <form action="{{ url_for('tasks.delete_task', id=task.id) }}" method="POST" onsubmit="return confirm('Are you sure?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <p class="text-muted">No tasks yet. Start by adding one!</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -2,6 +2,9 @@ from datetime import datetime
 from app.extensions import db
 
 class LedgerEntry(db.Model):
+    """
+    LedgerEntry model for personal accounting (income/expense).
+    """
     __tablename__ = 'ledger_entries'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -19,29 +22,50 @@ class LedgerEntry(db.Model):
 
     @staticmethod
     def create(user_id, amount, type, category=None, entry_date=None, note=None):
-        if not entry_date:
-            entry_date = datetime.utcnow().date()
-        entry = LedgerEntry(user_id=user_id, amount=amount, type=type, category=category, entry_date=entry_date, note=note)
-        db.session.add(entry)
-        db.session.commit()
-        return entry
+        """Records a new financial transaction."""
+        try:
+            if not entry_date:
+                entry_date = datetime.utcnow().date()
+            entry = LedgerEntry(user_id=user_id, amount=amount, type=type, category=category, entry_date=entry_date, note=note)
+            db.session.add(entry)
+            db.session.commit()
+            return entry
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error creating ledger entry: {e}")
+            return None
 
     @staticmethod
     def get_all(user_id=None):
+        """Returns all entries, optionally filtered by user_id and sorted by date."""
         if user_id:
             return LedgerEntry.query.filter_by(user_id=user_id).order_by(LedgerEntry.entry_date.desc()).all()
         return LedgerEntry.query.all()
 
     @staticmethod
     def get_by_id(entry_id):
+        """Returns a single entry by its ID."""
         return LedgerEntry.query.get(entry_id)
 
     def update(self, **kwargs):
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-        db.session.commit()
-        return self
+        """Updates entry attributes."""
+        try:
+            for key, value in kwargs.items():
+                setattr(self, key, value)
+            db.session.commit()
+            return self
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error updating ledger entry: {e}")
+            return None
 
     def delete(self):
-        db.session.delete(self)
-        db.session.commit()
+        """Deletes the entry."""
+        try:
+            db.session.delete(self)
+            db.session.commit()
+            return True
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error deleting ledger entry: {e}")
+            return False

@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}My Recipes - MyLife{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-5">
+    <div>
+        <h2 class="fw-bold mb-0">Recipe Collection</h2>
+        <p class="text-muted small">Your personal digital cookbook.</p>
+    </div>
+    <a href="{{ url_for('recipes.new_recipe') }}" class="btn btn-primary">+ Add Recipe</a>
+</div>
+
+<div class="row">
+    {% if recipes %}
+        {% for recipe in recipes %}
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h4 class="card-title fw-bold mb-0">{{ recipe.title }}</h4>
+                            <div class="dropdown">
+                                <button class="btn btn-link text-muted p-0" data-bs-toggle="dropdown">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{{ url_for('recipes.edit_recipe', id=recipe.id) }}">Edit</a></li>
+                                    <li>
+                                        <form action="{{ url_for('recipes.delete_recipe', id=recipe.id) }}" method="POST" onsubmit="return confirm('Delete this recipe?');">
+                                            <button type="submit" class="dropdown-item text-danger">Delete</button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {% if recipe.tags %}
+                                {% for tag in recipe.tags.split(',') %}
+                                    <span class="badge bg-light text-secondary me-1">{{ tag.strip() }}</span>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <h6 class="small fw-bold text-uppercase text-muted">Ingredients</h6>
+                                <p class="small text-truncate" style="max-height: 3.6em; line-height: 1.2;">{{ recipe.ingredients }}</p>
+                            </div>
+                            <div class="col-6">
+                                <h6 class="small fw-bold text-uppercase text-muted">Method</h6>
+                                <p class="small text-truncate" style="max-height: 3.6em; line-height: 1.2;">{{ recipe.steps }}</p>
+                            </div>
+                        </div>
+                        
+                        <a href="{{ url_for('recipes.edit_recipe', id=recipe.id) }}" class="btn btn-sm btn-outline-primary mt-3 w-100">View Full Recipe</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="col-12 text-center py-5">
+            <div class="mb-4">
+                <i class="bi bi-journal-plus display-1 text-light"></i>
+            </div>
+            <p class="text-muted">You haven't added any recipes yet. Save your favorite dishes!</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
